@@ -25,3 +25,5 @@ dist-ssr
 
 
 backend/plant_disease_detection/trained_model/plant_disease_prediction_model.h5
+
+.vercel

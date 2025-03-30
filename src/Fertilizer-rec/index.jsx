@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 function FertilizerRec() {
-  const [nitrogen, setNitrogen] = useState('');
-  const [phosphorus, setPhosphorus] = useState('');
-  const [potassium, setPotassium] = useState('');
-  const [fertilizer, setFertilizer] = useState('');
+  const [nitrogen, setNitrogen] = useState("");
+  const [phosphorus, setPhosphorus] = useState("");
+  const [potassium, setPotassium] = useState("");
+  const [fertilizer, setFertilizer] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
-    setFertilizer('');
+    setError("");
+    setFertilizer("");
     setLoading(true);
 
-    // Validate input
     if (!nitrogen || !phosphorus || !potassium) {
-      setError('Please enter values for all nutrients.');
+      setError("Please enter values for all nutrients.");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5003/api/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("http://127.0.0.1:5003/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nitrogen: parseFloat(nitrogen),
           phosphorus: parseFloat(phosphorus),
@@ -36,14 +33,14 @@ function FertilizerRec() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch recommendation.');
+        throw new Error(errorData.error || "Failed to fetch recommendation.");
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log("API Response:", data);
       setFertilizer(data.recommended_fertilizer);
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -52,41 +49,42 @@ function FertilizerRec() {
 
   return (
     <div
-      className="min-h-screen text-white bg-cover bg-center"
+      className="min-h-screen text-white bg-cover bg-center relative"
       style={{
         backgroundImage: "url('background_har.jpg')", // Replace with your image URL
-        backgroundAttachment: 'fixed', // Keeps the background fixed
+        backgroundAttachment: "scroll", // Changed from fixed to scroll
+        zIndex: 1, // Lowered to prevent blocking other elements
       }}
     >
       <div className="relative z-10 p-14">
-        {/* Title with inline styling */}
+        {/* Title */}
         <h1
           style={{
-            fontSize: '2.5rem',
-            fontWeight: 'bold',
-            color: 'white',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)', // Black with transparency
-            textAlign: 'center',
-            padding: '1rem', // Adjust padding as needed
-            marginBottom: '1.5rem',
-            width:'600px',
-            marginLeft:'275px',
-            borderRadius: '10px'
+            fontSize: "2.5rem",
+            fontWeight: "bold",
+            color: "white",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            textAlign: "center",
+            padding: "1rem",
+            marginBottom: "1.5rem",
+            width: "600px",
+            marginLeft: "auto",
+            marginRight: "auto",
+            borderRadius: "10px",
           }}
         >
           Fertilizer Recommendation
         </h1>
 
-
-        {/* Content with black transparent background */}
+        {/* Content */}
         <div
           style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.6)', // Black with transparency
-            padding: '2rem',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            maxWidth: '600px',
-            margin: 'auto',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            padding: "2rem",
+            borderRadius: "8px",
+            marginBottom: "2rem",
+            maxWidth: "600px",
+            margin: "auto",
           }}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,7 +98,7 @@ function FertilizerRec() {
                 name="nitrogen"
                 value={nitrogen}
                 onChange={(e) => setNitrogen(e.target.value)}
-                className="w-full p-2 border border-white-900 rounded text-white"
+                className="w-full p-2 border border-white-900 rounded text-white bg-transparent"
                 required
               />
             </div>
@@ -114,7 +112,7 @@ function FertilizerRec() {
                 name="phosphorus"
                 value={phosphorus}
                 onChange={(e) => setPhosphorus(e.target.value)}
-                className="w-full p-2 border border-white-900 rounded text-white"
+                className="w-full p-2 border border-white-900 rounded text-white bg-transparent"
                 required
               />
             </div>
@@ -128,7 +126,7 @@ function FertilizerRec() {
                 name="potassium"
                 value={potassium}
                 onChange={(e) => setPotassium(e.target.value)}
-                className="w-full p-2 border border-white-900 rounded text-white"
+                className="w-full p-2 border border-white-900 rounded text-white bg-transparent"
                 required
               />
             </div>
@@ -138,57 +136,34 @@ function FertilizerRec() {
               className="w-full bg-green-600 text-white text-lg font-bold py-2 rounded mt-7"
               disabled={loading}
             >
-              {loading ? 'Processing...' : 'Get Recommendation'}
+              {loading ? "Processing..." : "Get Recommendation"}
             </button>
           </form>
 
-          {/* Error Message with inline styling */}
+          {/* Error Message */}
           {error && (
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 0, 0, 0.7)', // Red with transparency
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center',
-                marginTop: '1.5rem',
-              }}
-            >
+            <div className="bg-red-600 text-white p-3 rounded mt-4 text-center">
               <p>{error}</p>
             </div>
           )}
         </div>
 
-        {/* Fertilizer Recommendation with inline styling */}
+        {/* Fertilizer Recommendation */}
         {fertilizer && (
           <div
             style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.6)', // Black with transparency
-              padding: '1.5rem',
-              borderRadius: '8px',
-              marginTop: '2rem',
-              maxWidth: '600px',
-              margin: 'auto',
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              padding: "1.5rem",
+              borderRadius: "8px",
+              marginTop: "2rem",
+              maxWidth: "600px",
+              margin: "auto",
             }}
           >
-            <h2
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: 'white',
-                marginBottom: '1rem',
-              }}
-            >
+            <h2 className="text-xl font-bold text-white mb-2">
               Recommended Fertilizer:
             </h2>
-            <p
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 'bold',
-                color: 'green',
-              }}
-            >
-              {fertilizer}
-            </p>
+            <p className="text-lg font-bold text-green-400">{fertilizer}</p>
           </div>
         )}
       </div>
@@ -197,3 +172,4 @@ function FertilizerRec() {
 }
 
 export default FertilizerRec;
+

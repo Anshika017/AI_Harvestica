@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"cd backend/crop_recommendation && python app.py\" \"cd backend/fertilizer_recommendation && python app.py\" \"cd backend/plant_disease_detection && python app.py\"",
+    "dev": "concurrently --kill-others-on-fail \"vite\" \"cd backend/crop_recommendation && python app.py\" \"cd backend/fertilizer_recommendation && python app.py\" \"cd backend/plant_disease_detection && python app.py\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
