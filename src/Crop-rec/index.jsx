@@ -13,16 +13,80 @@ const CropRecommendation = () => {
   });
 
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validateInput(name, value);
+  };
+
+  const validateInput = (name, value) => {
+    let errorMessage = "";
+
+    switch (name) {
+      case "Ph":
+        if (value < 1 || value > 14) {
+          errorMessage = "Ph value must be between 1 and 14.";
+        }
+        break;
+      case "Nitrogen":
+      case "Phosphorus":
+      case "Potassium":
+        if (value < 0 || value > 140) {
+          errorMessage = `${name} should be between 0 and 140 kg/ha.`;
+        }
+        break;
+      case "Temperature":
+        if (value < -10 || value > 60) {
+          errorMessage = "Temperature should be between -10°C and 60°C.";
+        }
+        break;
+      case "Humidity":
+        if (value < 0 || value > 100) {
+          errorMessage = "Humidity should be between 0% and 100%.";
+        }
+        break;
+      case "Rainfall":
+        if (value < 0 || value > 500) {
+          errorMessage = "Rainfall should be between 0 and 500 mm.";
+        }
+        break;
+      default:
+        break;
+    }
+
+    setValidationErrors({
+      ...validationErrors,
+      [name]: errorMessage,
+    });
+  };
+
+  const validateInputs = () => {
+    const errors = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach((key) => {
+      validateInput(key, formData[key]);
+      if (validationErrors[key]) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+
+    if (!validateInputs()) {
+      setResult("Please enter correct values for all fields.");
+      return;
+    }
+
     setResult(null);
+    setSubmitted(true);
 
     try {
       const response = await fetch("http://127.0.0.1:5001/predict", {
@@ -33,16 +97,30 @@ const CropRecommendation = () => {
 
       const data = await response.json();
       if (data.error) {
-        setError(data.error);
+        setResult("Error: " + data.error);
       } else {
         setResult(data.result);
       }
     } catch (error) {
-      setError("Server error! Please try again later.");
+      setResult("Server error! Please try again later.");
     }
   };
 
-  // Default crop image
+  const handleReset = () => {
+    setFormData({
+      Nitrogen: "",
+      Phosphorus: "",
+      Potassium: "",
+      Temperature: "",
+      Humidity: "",
+      Ph: "",
+      Rainfall: "",
+    });
+    setResult(null);
+    setValidationErrors({});
+    setSubmitted(false);
+  };
+
   const defaultCropImage = "crop_pic.jpg";
 
   const styles = {
@@ -62,6 +140,7 @@ const CropRecommendation = () => {
       color: "white",
       textAlign: "center",
       marginBottom: "20px",
+      marginTop:"20px",
     },
     formContainer: {
       background: "rgba(0, 0, 0, 0.8)",
@@ -82,6 +161,11 @@ const CropRecommendation = () => {
       border: "none",
       marginBottom: "15px",
     },
+    errorText: {
+      color: "red",
+      fontSize: "12px",
+      marginTop: "5px",
+    },
     button: {
       backgroundColor: "#28a745",
       border: "none",
@@ -89,37 +173,27 @@ const CropRecommendation = () => {
       fontSize: "18px",
       color: "white",
       cursor: "pointer",
+      borderRadius: "10px",
+      margin: "20px auto 0",
       display: "block",
-      //width: "100%",
-      marginLeft:"200px",
-      borderRadius:"10px",
-      marginTop:"10px",
-      marginBottom:"10px",
-      transition: "0.3s ease-in-out",
-    },
-    buttonHover: {
-      backgroundColor: "#218838",
     },
     resultContainer: {
       textAlign: "center",
       marginTop: "20px",
-      padding: "15px",
+      padding: "30px",
       borderRadius: "8px",
-      backgroundColor: "#ACE1AF",
-      color: "#000",
+      backgroundColor: "rgba(0, 0, 0, 0.8)", // black transparent background
+      color: "#fff", // white text
     },
     cropImage: {
       width: "200px",
       height: "200px",
       borderRadius: "5px",
-      marginTop: "10px",
+      margin: "20px auto",
       display: "block",
-      marginLeft: "auto",
-      marginRight: "auto",
     },
     cropText: {
       textAlign: "center",
-      marginTop: "10px",
       fontWeight: "bold",
       fontSize: "25px",
     },
@@ -127,83 +201,75 @@ const CropRecommendation = () => {
 
   return (
     <div style={styles.pageContainer}>
-      {/* Heading Container */}
       <div style={styles.headingContainer}>
         <h1>Crop Recommendation System 🌱</h1>
       </div>
 
-      {/* Form Container */}
-      <div style={styles.formContainer}>
-        <form onSubmit={handleSubmit}>
-          {/* First Row: Nitrogen, Phosphorus, Potassium */}
-          <div className="row">
-            {["Nitrogen", "Phosphorus", "Potassium"].map((param) => (
-              <div className="col-md-4" key={param}>
-                <label style={styles.label}>{param}</label>
-                <input
-                  type="number"
-                  name={param}
-                  value={formData[param]}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
-              </div>
-            ))}
-          </div>
+      {!submitted ? (
+        <div style={styles.formContainer}>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              {[{ label: "Nitrogen (kg/ha)", name: "Nitrogen" }, { label: "Phosphorus (kg/ha)", name: "Phosphorus" }, { label: "Potassium (kg/ha)", name: "Potassium" }].map(({ label, name }) => (
+                <div className="col-md-4" key={name}>
+                  <label style={styles.label}>{label}</label>
+                  <input
+                    type="number"
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    style={styles.input}
+                    required
+                  />
+                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                </div>
+              ))}
+            </div>
 
-          {/* Second Row: Temperature, Humidity */}
-          <div className="row">
-            {["Temperature", "Humidity"].map((param) => (
-              <div className="col-md-6" key={param}>
-                <label style={styles.label}>{param}</label>
-                <input
-                  type="number"
-                  name={param}
-                  value={formData[param]}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
-              </div>
-            ))}
-          </div>
+            <div className="row">
+              {[{ label: "Temperature (°C)", name: "Temperature" }, { label: "Humidity (%)", name: "Humidity" }].map(({ label, name }) => (
+                <div className="col-md-6" key={name}>
+                  <label style={styles.label}>{label}</label>
+                  <input
+                    type="number"
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    style={styles.input}
+                    required
+                  />
+                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                </div>
+              ))}
+            </div>
 
-          {/* Third Row: Ph, Rainfall */}
-          <div className="row">
-            {["Ph", "Rainfall"].map((param) => (
-              <div className="col-md-6" key={param}>
-                <label style={styles.label}>{param}</label>
-                <input
-                  type="number"
-                  name={param}
-                  value={formData[param]}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
-              </div>
-            ))}
-          </div>
+            <div className="row">
+              {[{ label: "Ph", name: "Ph" }, { label: "Rainfall (mm)", name: "Rainfall" }].map(({ label, name }) => (
+                <div className="col-md-6" key={name}>
+                  <label style={styles.label}>{label}</label>
+                  <input
+                    type="number"
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    style={styles.input}
+                    required
+                  />
+                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                </div>
+              ))}
+            </div>
 
-          <button type="submit" style={styles.button}>Get Recommendation</button>
-        </form>
-
-        {/* Display Result with Default Crop Image */}
-        {result && (
-          <div style={styles.resultContainer}>
-            <h4 className="mb-7">Recommended Crop for cultivation is:</h4>
-            <img src={defaultCropImage} alt={result} style={styles.cropImage} />
-            <p style={styles.cropText}>{result}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="alert alert-danger mt-4 text-center">
-            {error}
-          </div>
-        )}
-      </div>
+            <button type="submit" style={styles.button}>Get Recommendation</button>
+          </form>
+        </div>
+      ) : (
+        <div style={styles.resultContainer}>
+          <h4>Recommended Crop for Cultivation is:</h4>
+          <img src={defaultCropImage} alt={result} style={styles.cropImage} />
+          <p style={styles.cropText}>{result}</p>
+          <button onClick={handleReset} style={styles.button}>Recommend Again</button>
+        </div>
+      )}
     </div>
   );
 };

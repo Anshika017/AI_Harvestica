@@ -18,62 +18,64 @@ function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user"); // Remove user data
-    setUser(null); // Clear state
-    navigate("/"); // Redirect to home
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/");
   };
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div className="p-3 shadow-sm flex justify-between items-center px-5 bg-black relative z-10">
-        {/* Logo */}
-        <img src="/logo_harv.png" className="w-40 h-10" alt="Logo" />
+      <header className="fixed top-0 left-0 w-full bg-black shadow-md z-50">
+        <div className="p-3 px-5 flex justify-between items-center">
+          {/* Logo */}
+          <img src="/logoo.jpg" className="w-[120px] h-[40px] p-0 m-0" alt="Logo" />
 
-        <div className="relative flex items-center">
-          {/* Home Button */}
-          <Button
-            className="text-black bg-green-500 border-2 border-white py-2 px-6 rounded-full hover:bg-white hover:text-black mr-4"
-            onClick={() => navigate("/")}
-          >
-            Home
-          </Button>
-
-          {user ? (
-            <div className="relative">
-              {/* Profile Picture */}
-              <img
-                src={user.picture}
-                alt="User Profile"
-                className="w-10 h-10 rounded-full cursor-pointer border-2 border-white"
-                onClick={() => setMenuOpen((prev) => !prev)} // Toggle dropdown
-                onError={(e) => (e.target.src = "/default_img.jpg")} // Fallback image
-              />
-
-              {/* Dropdown Menu */}
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 bg-white shadow-md rounded-lg py-2 w-40 z-20">
-                  <p className="text-center text-gray-800 font-semibold p-2">{user.name}</p>
-                 <button
-                    className="block w-full text-left px-4 py-2 bg-white text-black font-semibold rounded-md border border-gray-300 hover:bg-gray-100"
-                    onClick={handleLogout}
-                  >
-                    Log Out
-                  </button>
-
-
-                </div>
-              )}
-            </div>
-          ) : (
+          <div className="relative flex items-center">
+            {/* Home Button */}
             <Button
-              className="text-black bg-green-500 border-2 border-white py-2 px-6 rounded-full hover:bg-white hover:text-black"
-              onClick={() => navigate("/sign-in")}
+              className="text-black bg-green-500 border-2 border-white py-2 px-6 rounded-full hover:bg-white hover:text-black mr-4"
+              onClick={() => navigate("/")}
             >
-              Get Started
+              Home
             </Button>
-          )}
+
+            {user ? (
+              <div className="relative">
+                {/* Profile Picture */}
+                <img
+                  src={user.picture}
+                  alt="User Profile"
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-white"
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  onError={(e) => (e.target.src = "/default_img.jpg")}
+                />
+
+                {/* Dropdown */}
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 bg-white shadow-md rounded-lg py-2 w-40 z-20">
+                    <p className="text-center text-gray-800 font-semibold p-2">
+                      {user.name}
+                    </p>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-black font-semibold rounded-md border border-gray-300 hover:bg-gray-100"
+                      onClick={handleLogout}
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                className="text-black bg-green-500 border-2 border-white py-2 px-6 rounded-full hover:bg-white hover:text-black"
+                onClick={() => navigate("/sign-in")}
+              >
+                Get Started
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
     </GoogleOAuthProvider>
   );
 }
