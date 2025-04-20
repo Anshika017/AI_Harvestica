@@ -1,14 +1,18 @@
-# React + Vite
+AI-Harvestica: Better Crops, Better Yields
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI-Harvestica is an innovative farming assistant designed to help smallholder farmers achieve better crops and better yields. By leveraging AI, this platform offers crop recommendations and plant disease detection, enabling farmers to optimize their production and improve the health of their crops.
 
-Currently, two official plugins are available:
+Key Features
+AI-powered Crop Recommendation System: Recommends the best crops based on your soil type, climate, and environmental conditions, ensuring the highest yield potential.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Plant Disease Detection: Detects plant diseases through deep learning models, providing farmers with early warnings and solutions to protect their crops from damage.
 
-## Model Download
+Real-time User Interaction: With an intuitive interface, farmers can easily interact with the system to receive tailored crop advice and disease prevention methods.
 
-The trained model is available for download from [Google Drive](https://drive.google.com/file/d/1K0v36Gh__yR4s_0f55LEdxq2bLghxkqO/view?usp=drive_link). Please ensure you download the file and place it in the correct directory (`backend/plant_disease_detection/trained_model/`).
+Scalable Backend: Built with Flask to ensure high performance and scalability, supporting growing data needs and large user bases.
 
-File size: 547 MB
+Responsive Frontend: Developed with React and Tailwind CSS, offering a user-friendly experience on both mobile and desktop devices.
+
+Model Download
+To run the plant disease detection model, download the trained model from [Google Drive Link](https://drive.google.com/file/d/1K0v36Gh__yR4s_0f55LEdxq2bLghxkqO/view?usp=drive_link) and place it in the correct directory:  
+`backend/plant_disease_detection/trained_model/`.
