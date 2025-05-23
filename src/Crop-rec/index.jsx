@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const BACKEND_STATIC_URL = "http://localhost:5000/static";
+
 const CropRecommendation = () => {
   const [formData, setFormData] = useState({
     Nitrogen: "",
@@ -57,14 +59,13 @@ const CropRecommendation = () => {
         break;
     }
 
-    setValidationErrors({
-      ...validationErrors,
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
       [name]: errorMessage,
-    });
+    }));
   };
 
   const validateInputs = () => {
-    const errors = {};
     let isValid = true;
 
     Object.keys(formData).forEach((key) => {
@@ -85,11 +86,11 @@ const CropRecommendation = () => {
       return;
     }
 
-    setResult(null);
     setSubmitted(true);
+    setResult(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5001/predict", {
+      const response = await fetch("/crop/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -121,8 +122,6 @@ const CropRecommendation = () => {
     setSubmitted(false);
   };
 
-  const defaultCropImage = "crop_pic.jpg";
-
   const styles = {
     pageContainer: {
       minHeight: "100vh",
@@ -130,7 +129,7 @@ const CropRecommendation = () => {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      background: "url('background_har.jpg') no-repeat center center/cover",
+      background: `url(${BACKEND_STATIC_URL}/background_har.jpg) no-repeat center center/cover`,
       padding: "50px 20px",
     },
     headingContainer: {
@@ -140,7 +139,6 @@ const CropRecommendation = () => {
       color: "white",
       textAlign: "center",
       marginBottom: "20px",
-      marginTop:"20px",
     },
     formContainer: {
       background: "rgba(0, 0, 0, 0.8)",
@@ -182,8 +180,8 @@ const CropRecommendation = () => {
       marginTop: "20px",
       padding: "30px",
       borderRadius: "8px",
-      backgroundColor: "rgba(0, 0, 0, 0.8)", // black transparent background
-      color: "#fff", // white text
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      color: "#fff",
     },
     cropImage: {
       width: "200px",
@@ -202,16 +200,16 @@ const CropRecommendation = () => {
   return (
     <div style={styles.pageContainer}>
       <div style={styles.headingContainer}>
-        <h1>Crop Recommendation System 🌱</h1>
+        <h1>🌾 Crop Recommendation System</h1>
       </div>
 
       {!submitted ? (
         <div style={styles.formContainer}>
           <form onSubmit={handleSubmit}>
             <div className="row">
-              {[{ label: "Nitrogen (kg/ha)", name: "Nitrogen" }, { label: "Phosphorus (kg/ha)", name: "Phosphorus" }, { label: "Potassium (kg/ha)", name: "Potassium" }].map(({ label, name }) => (
+              {["Nitrogen", "Phosphorus", "Potassium"].map((name) => (
                 <div className="col-md-4" key={name}>
-                  <label style={styles.label}>{label}</label>
+                  <label style={styles.label}>{name} (kg/ha)</label>
                   <input
                     type="number"
                     name={name}
@@ -220,15 +218,19 @@ const CropRecommendation = () => {
                     style={styles.input}
                     required
                   />
-                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                  {validationErrors[name] && (
+                    <div style={styles.errorText}>{validationErrors[name]}</div>
+                  )}
                 </div>
               ))}
             </div>
 
             <div className="row">
-              {[{ label: "Temperature (°C)", name: "Temperature" }, { label: "Humidity (%)", name: "Humidity" }].map(({ label, name }) => (
+              {["Temperature", "Humidity"].map((name) => (
                 <div className="col-md-6" key={name}>
-                  <label style={styles.label}>{label}</label>
+                  <label style={styles.label}>
+                    {name} {name === "Temperature" ? "(°C)" : "(%)"}
+                  </label>
                   <input
                     type="number"
                     name={name}
@@ -237,15 +239,17 @@ const CropRecommendation = () => {
                     style={styles.input}
                     required
                   />
-                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                  {validationErrors[name] && (
+                    <div style={styles.errorText}>{validationErrors[name]}</div>
+                  )}
                 </div>
               ))}
             </div>
 
             <div className="row">
-              {[{ label: "Ph", name: "Ph" }, { label: "Rainfall (mm)", name: "Rainfall" }].map(({ label, name }) => (
+              {["Ph", "Rainfall"].map((name) => (
                 <div className="col-md-6" key={name}>
-                  <label style={styles.label}>{label}</label>
+                  <label style={styles.label}>{name}</label>
                   <input
                     type="number"
                     name={name}
@@ -254,20 +258,34 @@ const CropRecommendation = () => {
                     style={styles.input}
                     required
                   />
-                  {validationErrors[name] && <div style={styles.errorText}>{validationErrors[name]}</div>}
+                  {validationErrors[name] && (
+                    <div style={styles.errorText}>{validationErrors[name]}</div>
+                  )}
                 </div>
               ))}
             </div>
 
-            <button type="submit" style={styles.button}>Get Recommendation</button>
+            <button type="submit" style={styles.button}>
+              Recommend Crop
+            </button>
           </form>
         </div>
       ) : (
         <div style={styles.resultContainer}>
-          <h4>Recommended Crop for Cultivation is:</h4>
-          <img src={defaultCropImage} alt={result} style={styles.cropImage} />
-          <p style={styles.cropText}>{result}</p>
-          <button onClick={handleReset} style={styles.button}>Recommend Again</button>
+          {result && (
+            <>
+              <h3>Recommended Crop:</h3>
+              <img
+                src={`${BACKEND_STATIC_URL}/crop_pic.jpg`}
+                alt="Crop"
+                style={styles.cropImage}
+              />
+              <div style={styles.cropText}>{result}</div>
+              <button onClick={handleReset} style={styles.button}>
+                Recommend Again
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

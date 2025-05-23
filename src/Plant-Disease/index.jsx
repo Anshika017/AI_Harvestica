@@ -252,7 +252,7 @@ const App = () => {
             formData.append('file', file);
 
             try {
-                const response = await axios.post('http://localhost:5002/predict', formData, {
+                const response = await axios.post('/plant/predict', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },

@@ -11,18 +11,21 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/predict": {
-        target: "http://localhost:5002", // Plant disease detection Flask backend
+      // Proxy requests starting with /crop to backend crop blueprint
+      "/crop": {
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
-      "/fertilizer-recommendation": {
-        target: "http://localhost:5003", // Fertilizer recommendation Flask backend
+      // Proxy requests starting with /fertilizer to backend fertilizer blueprint
+      "/fertilizer": {
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
-      "/crop-recommend": {
-        target: "http://localhost:5001", // Crop recommendation Flask backend
+      // Proxy requests starting with /plant to backend plant disease blueprint
+      "/plant": {
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },

@@ -1,12 +1,23 @@
-from flask import Flask, request, jsonify
+from flask import Blueprint, request, jsonify
+from flask_cors import CORS
 import numpy as np
 import pickle
-from flask_cors import CORS
+import os
 
-# Load trained models
-model = pickle.load(open("model.pkl", "rb"))
-sc = pickle.load(open("standardscaler.pkl", "rb"))
-ms = pickle.load(open("minmaxscaler.pkl", "rb"))
+# Define Blueprint
+crop_bp = Blueprint('crop_bp', __name__)
+CORS(crop_bp)  # Enable CORS for this blueprint
+
+# Load trained models with error handling
+try:
+    base_path = os.path.dirname(__file__)
+    model = pickle.load(open(os.path.join(base_path, "model.pkl"), "rb"))
+    sc = pickle.load(open(os.path.join(base_path, "standardscaler.pkl"), "rb"))
+    ms = pickle.load(open(os.path.join(base_path, "minmaxscaler.pkl"), "rb"))
+    print("Crop model and scalers loaded successfully!")
+except Exception as e:
+    print(f" ERROR loading model/scalers: {str(e)}")
+    exit()
 
 # Crop dictionary
 crop_dict = {
@@ -17,18 +28,15 @@ crop_dict = {
     21: "Chickpea", 22: "Coffee"
 }
 
-# Create Flask app
-app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend integration
-
-@app.route("/")
+@crop_bp.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "Welcome to Crop Recommendation System API!"})
+    return jsonify({"message": "Crop Recommendation API is running!"})
 
-@app.route("/predict", methods=["POST"])
-def predict():
+@crop_bp.route("/predict", methods=["POST"])
+def predict_crop():
     try:
         data = request.get_json()
+
         feature_list = [
             float(data["Nitrogen"]),
             float(data["Phosphorus"]),
@@ -44,12 +52,8 @@ def predict():
         final_features = sc.transform(scaled_features)
         prediction = model.predict(final_features)[0]
 
-        # Convert prediction (numeric) to crop name
         crop_name = crop_dict.get(prediction, "Unknown Crop")
 
         return jsonify({"result": crop_name})
     except Exception as e:
-        return jsonify({"error": f"Prediction failed: {str(e)}"})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+        return jsonify({"error": f"Prediction failed: {str(e)}"}), 500

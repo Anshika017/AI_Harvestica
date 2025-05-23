@@ -1,43 +1,42 @@
 import os
 import pickle
 import numpy as np
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
+from flask import Blueprint, request, jsonify
+from flask_cors import CORS
 
-app = Flask(__name__)
-
-# Enable CORS for all routes
-CORS(app)
+# Define Blueprint
+fertilizer_bp = Blueprint('fertilizer_bp', __name__)
+CORS(fertilizer_bp)  # Enable CORS for this blueprint
 
 # Absolute paths for model and scaler files
-model_path = os.path.abspath('classifier1.pkl')
-scaler_path = os.path.abspath('scaler.pkl')
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'classifier1.pkl'))
+scaler_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'scaler.pkl'))
 
 print(f"Looking for model at: {model_path}")
 print(f"Looking for scaler at: {scaler_path}")
 
-# Load model and scaler with error handling
+# Load model and scaler
 try:
     model = pickle.load(open(model_path, 'rb'))
     scaler = pickle.load(open(scaler_path, 'rb'))
-    print("Model and Scaler loaded successfully!")
+    print(" Model and Scaler loaded successfully!")
 except FileNotFoundError:
     print(f"ERROR: Model or Scaler file NOT FOUND at:\n{model_path}\n{scaler_path}")
     exit()
 except Exception as e:
-    print(f"ERROR: Failed to load model or scaler: {str(e)}")
+    print(f" ERROR: Failed to load model or scaler: {str(e)}")
     exit()
 
-@app.route('/', methods=['GET'])
+# Routes
+@fertilizer_bp.route('/', methods=['GET'])
 def home():
     return jsonify({'message': 'Fertilizer Recommendation API is running!'}), 200
 
-@app.route('/api/recommend', methods=['POST'])
+@fertilizer_bp.route('/api/recommend', methods=['POST'])
 def recommend_fertilizer():
     try:
         data = request.get_json()
-        
-        # Input validation
+
         nitrogen = data.get('nitrogen')
         phosphorus = data.get('phosphorus')
         potassium = data.get('potassium')
@@ -45,7 +44,6 @@ def recommend_fertilizer():
         if not all([nitrogen, phosphorus, potassium]):
             return jsonify({'error': 'Missing required nutrients (nitrogen, phosphorus, potassium)'}), 400
 
-        # Convert input to float and handle ValueError
         try:
             nitrogen = float(nitrogen)
             phosphorus = float(phosphorus)
@@ -53,12 +51,10 @@ def recommend_fertilizer():
         except ValueError:
             return jsonify({'error': 'Invalid input values. Please provide numeric values for all nutrients.'}), 400
 
-        # Prediction
         features = np.array([[nitrogen, phosphorus, potassium]])
         features_scaled = scaler.transform(features)
         prediction = model.predict(features_scaled)
 
-        # Fertilizer mapping
         fertilizer_mapping = {
             0: "TEN-TWENTY SIX-TWENTY SIX",
             1: "Fourteen-Thirty Five-Fourteen",
@@ -74,6 +70,3 @@ def recommend_fertilizer():
 
     except Exception as e:
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5003, host='0.0.0.0')

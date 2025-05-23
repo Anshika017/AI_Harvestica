@@ -35,7 +35,7 @@ function FertilizerRec() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5003/api/recommend", {
+      const response = await fetch("/fertilizer/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nitrogen: n, phosphorus: p, potassium: k }),
